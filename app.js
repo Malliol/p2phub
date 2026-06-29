@@ -143,3 +143,128 @@ if (downloadBtn)
       dlStatus.innerHTML = `<span class="err">${e.message}</span>`;
     }
   });
+
+// ===================== ЭТАП 4: ЧАТ (WebRTC через PeerJS) =====================
+const myIdEl = document.getElementById("myId");
+const copyIdBtn = document.getElementById("copyIdBtn");
+const peerIdEl = document.getElementById("peerId");
+const connectBtn = document.getElementById("connectBtn");
+const connStatus = document.getElementById("connStatus");
+const chatEl = document.getElementById("chat");
+const msgInput = document.getElementById("msgInput");
+const sendBtn = document.getElementById("sendBtn");
+
+let peer = null; // наш узел в сети PeerJS
+let conn = null; // текущее соединение с собеседником
+
+// --- история чата (хранится локально в браузере) ---
+const HISTORY_KEY = "p2phub-chat";
+function loadHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+function saveHistory(list) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(-200)));
+}
+function renderMsg(text, who) {
+  const div = document.createElement("div");
+  div.className = "msg " + (who === "me" ? "me" : "them");
+  div.innerHTML =
+    `<span class="who">${who === "me" ? "я" : "собеседник"}</span>` +
+    escapeHtml(text);
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+function escapeHtml(s) {
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+function addMessage(text, who) {
+  renderMsg(text, who);
+  const hist = loadHistory();
+  hist.push({ text, who, t: Date.now() });
+  saveHistory(hist);
+}
+
+// показать сохранённую переписку при загрузке
+if (chatEl) loadHistory().forEach((m) => renderMsg(m.text, m.who));
+
+// --- настройка соединения с собеседником ---
+function setupConnection(c) {
+  conn = c;
+  connStatus.textContent = "соединение…";
+  c.on("open", () => {
+    connStatus.innerHTML = `<span class="ok">подключено</span> к ${c.peer}`;
+  });
+  c.on("data", (data) => addMessage(String(data), "them"));
+  c.on("close", () => {
+    connStatus.textContent = "соединение закрыто";
+    conn = null;
+  });
+  c.on("error", (e) => {
+    connStatus.innerHTML = `<span class="err">ошибка: ${e.type || e}</span>`;
+  });
+}
+
+// --- создаём свой узел ---
+function initPeer() {
+  if (typeof Peer === "undefined") {
+    if (connStatus)
+      connStatus.innerHTML =
+        '<span class="err">PeerJS не загрузился (нет интернета?).</span>';
+    return;
+  }
+  peer = new Peer(); // случайный ID с публичного signaling-сервера
+  peer.on("open", (id) => {
+    myIdEl.value = id;
+  });
+  peer.on("connection", (c) => setupConnection(c)); // кто-то подключился к нам
+  peer.on("error", (e) => {
+    if (connStatus)
+      connStatus.innerHTML = `<span class="err">PeerJS: ${e.type || e}</span>`;
+  });
+}
+
+// --- обработчики кнопок ---
+if (copyIdBtn)
+  copyIdBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(myIdEl.value);
+      copyIdBtn.textContent = "Скопировано ✓";
+      setTimeout(() => (copyIdBtn.textContent = "Копировать"), 1500);
+    } catch {
+      myIdEl.select();
+    }
+  });
+
+if (connectBtn)
+  connectBtn.addEventListener("click", () => {
+    const id = peerIdEl.value.trim();
+    if (!id || !peer) return;
+    setupConnection(peer.connect(id));
+  });
+
+function sendMessage() {
+  const text = msgInput.value.trim();
+  if (!text) return;
+  if (!conn || !conn.open) {
+    connStatus.innerHTML =
+      '<span class="err">сначала подключись к другу</span>';
+    return;
+  }
+  conn.send(text);
+  addMessage(text, "me");
+  msgInput.value = "";
+}
+if (sendBtn) sendBtn.addEventListener("click", sendMessage);
+if (msgInput)
+  msgInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendMessage();
+  });
+
+// запускаем узел чата при загрузке (нужен интернет для signaling)
+if (myIdEl) initPeer();

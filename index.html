@@ -55,14 +55,29 @@
       </div>
     </section>
 
-    <!-- Экран: чат (заглушка, Этап 4) -->
+    <!-- Экран: чат (WebRTC через PeerJS, Этап 4) -->
     <section class="card">
       <h2>💬 Чат</h2>
-      <p class="muted">Сообщения напрямую между устройствами через WebRTC. Появится на Этапе 4.</p>
-      <div class="chat-box" id="chat">Здесь будет переписка…</div>
+      <p class="muted">Сообщения напрямую между устройствами через WebRTC.</p>
+
+      <h3 class="subhead">Твой ID</h3>
       <div class="row">
-        <input class="input" type="text" placeholder="Сообщение…" disabled>
-        <button class="btn" disabled>Отправить</button>
+        <input class="input mono" id="myId" readonly value="получаю…">
+        <button class="btn btn-sm" id="copyIdBtn">Копировать</button>
+      </div>
+      <p class="muted">Отправь этот ID другу — по нему он к тебе подключится.</p>
+
+      <h3 class="subhead">Подключиться к другу</h3>
+      <div class="row">
+        <input class="input mono" id="peerId" placeholder="ID друга…">
+        <button class="btn btn-sm" id="connectBtn">Подключиться</button>
+      </div>
+      <p class="muted" id="connStatus">не подключено</p>
+
+      <div class="chat-box" id="chat"></div>
+      <div class="row">
+        <input class="input" id="msgInput" type="text" placeholder="Сообщение…">
+        <button class="btn" id="sendBtn">Отправить</button>
       </div>
     </section>
 
@@ -81,6 +96,8 @@
   <!-- Библиотека WebTorrent (торрент в браузере). UMD-сборка v1.9.7 —
        создаёт глобальную переменную WebTorrent для обычного <script>. -->
   <script src="https://cdn.jsdelivr.net/npm/webtorrent@1.9.7/webtorrent.min.js"></script>
+  <!-- PeerJS: простой WebRTC + публичный signaling-сервер для знакомства пиров -->
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
