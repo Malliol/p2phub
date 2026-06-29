@@ -160,6 +160,13 @@ wss.on('connection', (ws) => {
   ws.on('error', () => { if (user) clients.delete(ws); });
 });
 
+process.on('uncaughtException', (err) => {
+  console.error('[uncaughtException]', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[unhandledRejection]', reason);
+});
+
 if (process.argv[1] === new URL(import.meta.url).pathname) {
   server.listen(PORT, () => console.log(`Server on :${PORT}`));
 }
