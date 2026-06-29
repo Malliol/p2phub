@@ -180,6 +180,35 @@ pizdetsBtn.addEventListener("click", () => {
   showToast("Пиздец отправлен всем!");
 });
 
+// ===== PWA INSTALL =====
+const installBtn  = document.getElementById("installBtn");
+const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+const isIos        = /iphone|ipad|ipod/i.test(navigator.userAgent);
+let deferredPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!isStandalone) installBtn.classList.remove("hidden");
+});
+
+installBtn.addEventListener("click", async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installBtn.classList.add("hidden");
+  }
+});
+
+window.addEventListener("appinstalled", () => installBtn.classList.add("hidden"));
+
+if (isIos && !isStandalone) {
+  installBtn.textContent = "📲 Safari → Поделиться → На экран «Домой»";
+  installBtn.classList.remove("hidden");
+  installBtn.style.pointerEvents = "none";
+}
+
 // ===== START =====
 function startApp(username) {
   currentUsername = username;

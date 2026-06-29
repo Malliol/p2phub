@@ -280,6 +280,25 @@ body {
   opacity: 0.6;
 }
 
+.install-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+  padding: 12px 20px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.install-btn:hover { background: var(--bg2); color: var(--text); border-color: var(--accent); }
+
 /* TOAST */
 .toast {
   position: fixed;
