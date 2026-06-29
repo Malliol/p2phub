@@ -209,11 +209,34 @@ if (isIos && !isStandalone) {
   installBtn.style.pointerEvents = "none";
 }
 
+// ===== PUSH ПОДПИСКА =====
+async function subscribeToPush() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) return; // уже подписан
+
+    const res = await fetch('/api/vapid-public-key');
+    const { key } = await res.json();
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: key,
+    });
+    await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sub),
+    });
+  } catch {}
+}
+
 // ===== START =====
 function startApp(username) {
   currentUsername = username;
   authScreen.classList.add("hidden");
   appScreen.classList.remove("hidden");
-  if (Notification.permission === "default") Notification.requestPermission();
+  Notification.requestPermission().then(perm => {
+    if (perm === 'granted') subscribeToPush();
+  });
   connectWS(username);
 }

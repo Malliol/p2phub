@@ -1,9 +1,5 @@
-// service-worker.js — кэширует «оболочку» приложения, чтобы ОСГОворим
-// открывался даже без интернета (Этап 2).
+const CACHE = "osgovorim-v6";
 
-const CACHE = "osgovorim-v5";
-
-// Файлы самого приложения (всё своё, без CDN — их кэшируем заранее).
 const ASSETS = [
   "./",
   "./index.html",
@@ -15,15 +11,11 @@ const ASSETS = [
   "./icons/icon-512.png",
 ];
 
-// Установка: складываем оболочку в кэш.
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS))
-  );
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
   self.skipWaiting();
 });
 
-// Активация: удаляем старые версии кэша.
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -33,27 +25,40 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Запросы:
-//  - свои файлы (тот же origin) -> сначала кэш, потом сеть;
-//  - чужие (CDN библиотек WebTorrent/PeerJS) -> всегда сеть, не кэшируем.
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
-
   const sameOrigin = new URL(req.url).origin === self.location.origin;
-  if (!sameOrigin) return; // пусть идёт в сеть как обычно
-
+  if (!sameOrigin) return;
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
-      return fetch(req)
-        .then((resp) => {
-          // подкладываем свежие свои файлы в кэш
-          const copy = resp.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
-          return resp;
-        })
-        .catch(() => cached);
+      return fetch(req).then((resp) => {
+        const copy = resp.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+        return resp;
+      }).catch(() => cached);
     })
   );
+});
+
+// Push-уведомления (когда приложение закрыто)
+self.addEventListener("push", (event) => {
+  let data = { title: "⚠️ ПИЗДЕЦ!", body: "Кто-то нажал кнопку", icon: "./icons/icon-192.png" };
+  try { data = { ...data, ...event.data.json() }; } catch {}
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: data.icon,
+      badge: data.icon,
+      vibrate: [200, 100, 200],
+      tag: "pizdets",
+      renotify: true,
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(clients.openWindow("/"));
 });
