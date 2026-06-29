@@ -1,8 +1,8 @@
-// app.js — логика P2PHub.
+// app.js — логика ОСГОворим.
 // Этап 1: пока пусто, только проверка, что скрипт подключён.
 // Дальше здесь появятся модули файлов (WebTorrent) и сообщений (WebRTC).
 
-console.log("P2PHub: приложение загружено.");
+console.log("ОСГОворим: приложение загружено.");
 
 const statusEl = document.getElementById("status");
 if (statusEl) {
@@ -15,8 +15,8 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("service-worker.js")
-      .then(() => console.log("P2PHub: service worker зарегистрирован."))
-      .catch((err) => console.warn("P2PHub: SW не зарегистрирован:", err));
+      .then(() => console.log("ОСГОворим: service worker зарегистрирован."))
+      .catch((err) => console.warn("ОСГОворим: SW не зарегистрирован:", err));
   });
 }
 

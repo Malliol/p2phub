@@ -1,4 +1,4 @@
-# Дорожная карта (Roadmap) P2PHub
+# Дорожная карта (Roadmap) ОСГОворим
 
 > Незнакомые слова — в [GLOSSARY.md](GLOSSARY.md). Устройство системы — в
 > [ARCHITECTURE.md](ARCHITECTURE.md).
