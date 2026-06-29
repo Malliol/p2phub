@@ -2,145 +2,104 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0d1117">
   <title>ОСГОворим</title>
-
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ОСГОворим">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ===== ЭКРАН АВТОРИЗАЦИИ ===== -->
+  <!-- ЭКРАН АВТОРИЗАЦИИ -->
   <div id="authScreen" class="auth-screen">
     <div class="auth-card">
-      <h1 class="auth-logo">ОСГОворим</h1>
-      <p class="auth-sub muted">P2P мессенджер</p>
-
+      <div class="auth-logo-wrap">
+        <div class="auth-icon">💬</div>
+        <h1 class="auth-logo">ОСГОворим</h1>
+        <p class="auth-sub">Мессенджер без посредников</p>
+      </div>
       <div class="auth-tabs">
         <button class="auth-tab active" id="tabLogin">Вход</button>
         <button class="auth-tab" id="tabRegister">Регистрация</button>
       </div>
-
       <form id="authForm" autocomplete="on">
-        <label class="auth-label">Логин</label>
-        <input class="input auth-input" id="authUsername" type="text"
-          placeholder="ваш_логин" autocomplete="username" required>
-
-        <label class="auth-label">Пароль</label>
-        <input class="input auth-input" id="authPassword" type="password"
-          placeholder="••••••••" autocomplete="current-password" required>
-
+        <div class="field-group">
+          <label class="field-label">Логин</label>
+          <input class="field-input" id="authUsername" type="text" placeholder="введи логин" autocomplete="username" required>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Пароль</label>
+          <input class="field-input" id="authPassword" type="password" placeholder="••••••••" autocomplete="current-password" required>
+        </div>
         <p class="auth-error hidden" id="authError"></p>
-
-        <button class="btn auth-submit" id="authSubmit" type="submit">Войти</button>
+        <button class="auth-submit" id="authSubmit" type="submit">Войти</button>
       </form>
     </div>
   </div>
 
-  <!-- ===== ОСНОВНОЕ ПРИЛОЖЕНИЕ ===== -->
-  <div id="appScreen" class="hidden">
+  <!-- ПРИЛОЖЕНИЕ -->
+  <div id="appScreen" class="app hidden">
 
-    <!-- Кнопка «Пиздец» — сверху по центру -->
-    <div class="pizdets-wrap">
-      <button class="pizdets-btn" id="pizdetsBtn" title="Отправить уведомление всем">
-        Пиздец
-      </button>
-    </div>
-
-    <header class="topbar">
-      <h1 class="logo">ОСГОворим</h1>
-      <div class="topbar-right">
-        <span class="status" id="status">не подключено</span>
-        <button class="btn btn-sm btn-ghost" id="logoutBtn">Выйти</button>
+    <header class="app-header">
+      <div class="header-left">
+        <button class="icon-btn" id="sidebarToggle" title="Участники">👥</button>
+        <span class="header-logo">ОСГОворим</span>
+        <span class="conn-dot" id="connDot"></span>
+        <span class="header-status" id="wsStatus">подключение…</span>
+      </div>
+      <div class="header-right">
+        <button class="pizdets-btn" id="pizdetsBtn">Пиздец</button>
+        <button class="icon-btn" id="logoutBtn" title="Выйти">⎋</button>
       </div>
     </header>
 
-    <main class="container">
+    <div class="app-body">
 
-      <!-- Кто вошёл -->
-      <div class="user-badge" id="userBadge"></div>
-
-      <!-- Файлы -->
-      <section class="card">
-        <h2>📁 Файлы</h2>
-        <p class="muted">Передача файлов напрямую между устройствами через WebTorrent.</p>
-
-        <h3 class="subhead">Поделиться</h3>
-        <input type="file" id="fileInput" hidden>
-        <button class="btn" id="shareBtn">Выбрать файл и раздать</button>
-        <div id="seedInfo" class="hidden">
-          <p class="muted" id="seedStatus"></p>
-          <textarea class="input mono" id="magnetOut" rows="3" readonly></textarea>
-          <div class="row">
-            <button class="btn btn-sm" id="copyBtn">Скопировать ссылку</button>
-          </div>
+      <aside class="sidebar open" id="sidebar">
+        <div class="sidebar-header">
+          Онлайн&nbsp;<span class="online-badge" id="onlineCount">0</span>
         </div>
+        <ul class="user-list" id="userList"></ul>
+      </aside>
 
-        <h3 class="subhead">Получить</h3>
-        <textarea class="input mono" id="magnetIn" rows="2"
-          placeholder="Вставь сюда magnet-ссылку…"></textarea>
-        <div class="row">
-          <button class="btn btn-sm" id="downloadBtn">Скачать</button>
+      <main class="chat-area">
+        <div class="messages" id="messages">
+          <div class="messages-empty" id="messagesEmpty">Напиши первое сообщение</div>
         </div>
-        <div id="dlInfo" class="hidden">
-          <div class="progress"><div class="progress-bar" id="dlBar"></div></div>
-          <p class="muted" id="dlStatus"></p>
-          <div id="dlResult"></div>
+        <div class="input-bar">
+          <input class="msg-input" id="msgInput" type="text" placeholder="Сообщение…" autocomplete="off" maxlength="2000">
+          <button class="send-btn" id="sendBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
         </div>
-      </section>
+      </main>
 
-      <!-- Чат -->
-      <section class="card">
-        <h2>💬 Чат</h2>
-        <p class="muted">Сообщения напрямую через WebRTC.</p>
-
-        <h3 class="subhead">Твой ID</h3>
-        <div class="row">
-          <input class="input mono" id="myId" readonly value="получаю…">
-          <button class="btn btn-sm" id="copyIdBtn">Копировать</button>
-        </div>
-        <p class="muted">Отправь этот ID другу — по нему он к тебе подключится.</p>
-
-        <h3 class="subhead">Подключиться к другу</h3>
-        <div class="row">
-          <input class="input mono" id="peerId" placeholder="ID друга…">
-          <button class="btn btn-sm" id="connectBtn">Подключиться</button>
-        </div>
-        <p class="muted" id="connStatus">не подключено</p>
-
-        <div class="chat-box" id="chat"></div>
-        <div class="row">
-          <input class="input" id="msgInput" type="text" placeholder="Сообщение…">
-          <button class="btn" id="sendBtn">Отправить</button>
-        </div>
-      </section>
-
-      <section class="card info">
-        <h2>ℹ️ О проекте</h2>
-        <p class="muted">
-          Децентрализованный обмен сообщениями и файлами без сервера.
-          <a href="docs/ROADMAP.md">Дорожная карта</a>.
-        </p>
-      </section>
-    </main>
-
-    <div id="installBar" class="install-bar hidden">
-      <button class="btn" id="installBtn">⬇️ Установить приложение</button>
-      <p class="muted" id="installHint"></p>
     </div>
 
-    <footer class="footer muted">ОСГОворим · P2P обмен файлами и сообщениями</footer>
+    <!-- Кнопка установки -->
+    <div id="installBanner" class="install-banner hidden">
+      <span class="install-icon">📲</span>
+      <div class="install-text">
+        <b>Установить приложение</b>
+        <small id="installHint">Работает офлайн</small>
+      </div>
+      <button class="install-action" id="installBtn">Установить</button>
+      <button class="install-close" id="installClose">✕</button>
+    </div>
+
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/webtorrent@1.9.7/webtorrent.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <!-- Тост -->
+  <div class="toast hidden" id="toast"></div>
+
   <script type="module" src="app.js"></script>
 </body>
 </html>
