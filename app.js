@@ -235,8 +235,10 @@ function startApp(username) {
   currentUsername = username;
   authScreen.classList.add("hidden");
   appScreen.classList.remove("hidden");
-  Notification.requestPermission().then(perm => {
-    if (perm === 'granted') subscribeToPush();
-  });
+  if (typeof Notification !== 'undefined' && Notification.requestPermission) {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') subscribeToPush();
+    }).catch(() => {});
+  }
   connectWS(username);
 }
