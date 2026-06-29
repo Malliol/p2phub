@@ -64,6 +64,38 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   navigator.serviceWorker.register("service-worker.js").catch(() => {});
 }
 
+// ===== ЗВУК =====
+let audioCtx = null;
+
+function unlockAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playAlarm() {
+  try {
+    unlockAudio();
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    // Сирена: высокий → низкий → высокий, 3 раза
+    [[0, 880, 440], [0.35, 440, 880], [0.7, 880, 440]].forEach(([start, from, to]) => {
+      const osc  = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(from, now + start);
+      osc.frequency.linearRampToValueAtTime(to, now + start + 0.3);
+      gain.gain.setValueAtTime(0.25, now + start);
+      gain.gain.linearRampToValueAtTime(0, now + start + 0.35);
+      osc.start(now + start);
+      osc.stop(now + start + 0.36);
+    });
+  } catch {}
+}
+
 // ===== TOAST =====
 const toastEl = document.getElementById("toast");
 let toastTimer;
@@ -156,10 +188,11 @@ function handleMsg(msg) {
       showToast(`⚠️ ПИЗДЕЦ от ${msg.username}!`);
       pizdetsBtn.classList.add("fire");
       setTimeout(() => pizdetsBtn.classList.remove("fire"), 420);
-      if (Notification.permission === "granted") {
+      playAlarm();
+      if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
+      if (typeof Notification !== 'undefined' && Notification.permission === "granted") {
         new Notification("⚠️ ПИЗДЕЦ!", { body: `Сигнал от ${msg.username}` });
       }
-      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       break;
     case "kicked":
       kicked = true;
@@ -174,6 +207,7 @@ function handleMsg(msg) {
 }
 
 pizdetsBtn.addEventListener("click", () => {
+  unlockAudio(); // разблокируем AudioContext через жест пользователя
   wsSend({ type: "pizdets" });
   pizdetsBtn.classList.add("fire");
   setTimeout(() => pizdetsBtn.classList.remove("fire"), 420);

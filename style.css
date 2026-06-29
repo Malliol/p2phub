@@ -25,10 +25,13 @@ body {
 /* ===== AUTH ===== */
 .auth-screen {
   height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
   background: radial-gradient(ellipse at 50% 0%, #161b22 0%, #0d1117 70%);
 }
 
@@ -78,9 +81,10 @@ body {
   border-radius: 10px;
   padding: 12px 14px;
   color: var(--text);
-  font-size: 15px;
+  font-size: 16px; /* 16px чтобы Safari не зумировал поле */
   outline: none;
   transition: border-color 0.15s;
+  -webkit-appearance: none;
 }
 .field-input:focus { border-color: var(--accent); }
 
@@ -96,7 +100,7 @@ body {
 
 .auth-submit {
   width: 100%;
-  padding: 13px;
+  padding: 14px;
   background: var(--accent);
   color: #fff;
   border: none;
@@ -106,6 +110,8 @@ body {
   cursor: pointer;
   margin-top: 4px;
   transition: opacity 0.15s, transform 0.1s;
+  -webkit-appearance: none;
+  touch-action: manipulation;
 }
 .auth-submit:hover { opacity: 0.9; }
 .auth-submit:active { transform: scale(0.98); }
@@ -149,7 +155,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 12px;
+  padding: 8px 12px;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -157,6 +163,8 @@ body {
   font-size: 13px;
   cursor: pointer;
   transition: background 0.12s, color 0.12s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .logout-btn:hover { background: var(--bg3); color: var(--text); }
 
@@ -169,37 +177,38 @@ body {
   justify-content: center;
   gap: 40px;
   padding: 40px 20px;
-  padding-bottom: calc(40px + env(safe-area-inset-bottom));
+  padding-bottom: max(40px, calc(24px + env(safe-area-inset-bottom)));
   overflow-y: auto;
 }
 
 /* КНОПКА ПИЗДЕЦ */
 .pizdets-btn {
-  width: 180px;
-  height: 180px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
   border: none;
   background: var(--danger);
   color: #fff;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 900;
   letter-spacing: 0.05em;
   cursor: pointer;
   box-shadow:
-    0 0 0 6px rgba(218,54,51,0.15),
-    0 0 0 14px rgba(218,54,51,0.07),
-    0 8px 40px rgba(218,54,51,0.45);
+    0 0 0 8px rgba(218,54,51,0.15),
+    0 0 0 18px rgba(218,54,51,0.07),
+    0 10px 50px rgba(218,54,51,0.5);
   transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   flex-shrink: 0;
 }
 .pizdets-btn:hover {
   background: var(--danger-dark);
   box-shadow:
-    0 0 0 8px rgba(218,54,51,0.2),
-    0 0 0 18px rgba(218,54,51,0.1),
-    0 12px 50px rgba(218,54,51,0.55);
+    0 0 0 10px rgba(218,54,51,0.2),
+    0 0 0 22px rgba(218,54,51,0.1),
+    0 14px 60px rgba(218,54,51,0.6);
   transform: scale(1.05);
 }
 .pizdets-btn:active { transform: scale(0.93); }
@@ -213,7 +222,7 @@ body {
 /* ОНЛАЙН */
 .online-box {
   width: 100%;
-  max-width: 340px;
+  max-width: 360px;
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -250,16 +259,16 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
+  padding: 11px 16px;
   border-bottom: 1px solid var(--border);
 }
 .user-item:last-child { border-bottom: none; }
 
 .user-avatar {
-  width: 32px; height: 32px;
+  width: 34px; height: 34px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700;
+  font-size: 14px; font-weight: 700;
   color: #fff;
   flex-shrink: 0;
 }
@@ -288,8 +297,8 @@ body {
   justify-content: center;
   gap: 8px;
   width: 100%;
-  max-width: 340px;
-  padding: 12px 20px;
+  max-width: 360px;
+  padding: 13px 20px;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -298,20 +307,21 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
+  touch-action: manipulation;
 }
 .install-btn:hover { background: var(--bg2); color: var(--text); border-color: var(--accent); }
 
 /* TOAST */
 .toast {
   position: fixed;
-  top: 62px;
+  top: calc(62px + env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%) translateY(-8px);
   background: var(--danger);
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
-  padding: 10px 22px;
+  padding: 12px 24px;
   border-radius: 999px;
   z-index: 9999;
   box-shadow: 0 4px 24px rgba(218,54,51,0.5);
@@ -319,28 +329,31 @@ body {
   transition: opacity 0.22s, transform 0.22s;
   pointer-events: none;
   white-space: nowrap;
+  max-width: calc(100vw - 32px);
+  text-align: center;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 .hidden { display: none !important; }
 
+/* ===== МОБИЛЬНЫЙ (<= 480px) ===== */
 @media (max-width: 480px) {
-  .auth-screen { padding: 16px; padding-top: calc(16px + env(safe-area-inset-top)); }
   .auth-card { padding: 28px 20px; border-radius: 16px; }
 
-  .pizdets-btn {
-    width: 200px;
-    height: 200px;
-    font-size: 20px;
+  .main {
+    gap: 28px;
+    justify-content: space-evenly;
   }
 
-  .main { gap: 32px; padding: 24px 16px; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+  .pizdets-btn {
+    width: min(220px, 55vw);
+    height: min(220px, 55vw);
+    font-size: 22px;
+  }
 
   .online-box { max-width: 100%; }
   .install-btn { max-width: 100%; }
 
   .logout-btn span { display: none; }
   .logout-btn { padding: 10px 12px; }
-
-  .header-logo { font-size: 14px; }
 }
