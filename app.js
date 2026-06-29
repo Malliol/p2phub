@@ -48,17 +48,15 @@ authForm.addEventListener("submit", async (e) => {
 logoutBtn.addEventListener("click", () => {
   logout();
   closeWS();
-  closeMenu();
   appScreen.classList.add("hidden");
   authScreen.classList.remove("hidden");
   authPassword.value = "";
-  messagesEl.innerHTML = '<div class="messages-empty" id="messagesEmpty">Напиши первое сообщение</div>';
 });
 
-const currentUser = getCurrentUser();
-if (currentUser) {
+const existingUser = getCurrentUser();
+if (existingUser) {
   authScreen.classList.add("hidden");
-  startApp(currentUser);
+  startApp(existingUser);
 }
 
 // ===== PWA =====
@@ -69,43 +67,18 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
 // ===== TOAST =====
 const toastEl = document.getElementById("toast");
 let toastTimer;
-function showToast(text, type) {
+function showToast(text) {
   toastEl.textContent = text;
-  toastEl.className = "toast show" + (type === "info" ? " info" : "");
+  toastEl.className = "toast show";
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3000);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3500);
 }
 
-// ===== MENU =====
-const menuToggle  = document.getElementById("menuToggle");
-const menuDrawer  = document.getElementById("menuDrawer");
-const menuOverlay = document.getElementById("menuOverlay");
-
-function openMenu() {
-  menuDrawer.classList.add("open");
-  menuOverlay.classList.remove("hidden");
-  requestAnimationFrame(() => menuOverlay.classList.add("open"));
-}
-
-function closeMenu() {
-  menuDrawer.classList.remove("open");
-  menuOverlay.classList.remove("open");
-  setTimeout(() => menuOverlay.classList.add("hidden"), 230);
-}
-
-menuToggle.addEventListener("click", () => {
-  menuDrawer.classList.contains("open") ? closeMenu() : openMenu();
-});
-menuOverlay.addEventListener("click", closeMenu);
-
-// ===== CHAT =====
+// ===== WS =====
 let ws = null;
 
 const wsStatus    = document.getElementById("wsStatus");
 const connDot     = document.getElementById("connDot");
-const messagesEl  = document.getElementById("messages");
-const msgInput    = document.getElementById("msgInput");
-const sendBtn     = document.getElementById("sendBtn");
 const userList    = document.getElementById("userList");
 const onlineCount = document.getElementById("onlineCount");
 const pizdetsBtn  = document.getElementById("pizdetsBtn");
@@ -128,70 +101,23 @@ function connectWS(username) {
   closeWS();
   setStatus("подключение…", "");
   ws = new WebSocket(getWsUrl());
-  ws.onopen  = () => ws.send(JSON.stringify({ type: "join", username }));
+  ws.onopen    = () => ws.send(JSON.stringify({ type: "join", username }));
   ws.onmessage = (e) => { try { handleMsg(JSON.parse(e.data)); } catch {} };
-  ws.onclose = () => { setStatus("нет соединения", "error"); setTimeout(() => connectWS(username), 3000); };
-  ws.onerror = () => setStatus("ошибка", "error");
+  ws.onclose   = () => { setStatus("нет соединения", "error"); setTimeout(() => connectWS(username), 3000); };
+  ws.onerror   = () => setStatus("ошибка", "error");
 }
 
 function wsSend(data) {
   if (ws && ws.readyState === 1) ws.send(JSON.stringify(data));
 }
 
-function fmtTime(ts) {
-  return new Date(ts || Date.now()).toLocaleTimeString("ru", { hour: "2-digit", minute: "2-digit" });
-}
-
-function getEmptyEl() { return document.getElementById("messagesEmpty"); }
-
-function appendMsg(data) {
-  getEmptyEl()?.remove();
-  const mine = data.username === currentUsername;
-  const row = document.createElement("div");
-  row.className = `msg-row ${mine ? "mine" : "theirs"}`;
-
-  if (!mine) {
-    const meta = document.createElement("div");
-    meta.className = "msg-meta";
-    meta.style.color = data.color || "var(--muted)";
-    meta.textContent = data.username;
-    row.appendChild(meta);
-  }
-
-  const bubble = document.createElement("div");
-  bubble.className = "msg-bubble";
-  bubble.textContent = data.text;
-  row.appendChild(bubble);
-
-  const time = document.createElement("div");
-  time.className = "msg-time";
-  time.textContent = fmtTime(data.t);
-  row.appendChild(time);
-
-  messagesEl.appendChild(row);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
-function appendSys(text) {
-  const el = document.createElement("div");
-  el.className = "sys-msg";
-  el.textContent = text;
-  messagesEl.appendChild(el);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
-function appendPizdets(username) {
-  getEmptyEl()?.remove();
-  const el = document.createElement("div");
-  el.className = "pizdets-msg";
-  el.textContent = `⚠️ ПИЗДЕЦ от ${username}`;
-  messagesEl.appendChild(el);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
 function renderUsers(users) {
   onlineCount.textContent = users.length;
   userList.innerHTML = "";
+  if (!users.length) {
+    userList.innerHTML = '<li class="online-empty">Никого нет онлайн</li>';
+    return;
+  }
   for (const u of users) {
     const li = document.createElement("li");
     li.className = "user-item";
@@ -201,7 +127,13 @@ function renderUsers(users) {
     av.textContent = u.username[0].toUpperCase();
     const nm = document.createElement("span");
     nm.className = "user-name";
-    nm.textContent = u.username + (u.username === currentUsername ? " (я)" : "");
+    nm.textContent = u.username;
+    if (u.username === currentUsername) {
+      const me = document.createElement("span");
+      me.className = "user-name-me";
+      me.textContent = "(я)";
+      nm.appendChild(me);
+    }
     li.append(av, nm);
     userList.appendChild(li);
   }
@@ -209,85 +141,28 @@ function renderUsers(users) {
 
 function handleMsg(msg) {
   switch (msg.type) {
-    case "init":
+    case "users":
       setStatus("в сети", "online");
-      renderUsers(msg.users || []);
-      for (const m of (msg.history || [])) {
-        if (m.type === "message") appendMsg(m);
-        else if (m.type === "pizdets") appendPizdets(m.username);
-      }
-      break;
-    case "message":
-      appendMsg(msg);
-      if (msg.username !== currentUsername && document.hidden && Notification.permission === "granted") {
-        new Notification(`${msg.username}: ${msg.text.slice(0, 80)}`);
-      }
-      break;
-    case "system":
-      appendSys(msg.text);
       renderUsers(msg.users || []);
       break;
     case "pizdets":
-      appendPizdets(msg.username);
-      showToast(`⚠️ Пиздец от ${msg.username}!`);
+      showToast(`⚠️ ПИЗДЕЦ от ${msg.username}!`);
+      pizdetsBtn.classList.add("fire");
+      setTimeout(() => pizdetsBtn.classList.remove("fire"), 420);
       if (Notification.permission === "granted") {
-        new Notification("ОСГОворим: ПИЗДЕЦ!", { body: `Сигнал от ${msg.username}` });
+        new Notification("⚠️ ПИЗДЕЦ!", { body: `Сигнал от ${msg.username}` });
       }
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       break;
   }
 }
 
-function sendMessage() {
-  const text = msgInput.value.trim();
-  if (!text || !ws || ws.readyState !== 1) return;
-  wsSend({ type: "message", text });
-  msgInput.value = "";
-}
-
-sendBtn.addEventListener("click", sendMessage);
-msgInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-});
-
 pizdetsBtn.addEventListener("click", () => {
   wsSend({ type: "pizdets" });
   pizdetsBtn.classList.add("fire");
-  setTimeout(() => pizdetsBtn.classList.remove("fire"), 400);
-  showToast("Пиздец отправлен всем!", "");
+  setTimeout(() => pizdetsBtn.classList.remove("fire"), 420);
+  showToast("Пиздец отправлен всем!");
 });
-
-// ===== PWA INSTALL =====
-const installStrip = document.getElementById("installStrip");
-const installBtn   = document.getElementById("installBtn");
-const installClose = document.getElementById("installClose");
-const installHint  = document.getElementById("installHint");
-let deferredPrompt = null;
-const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
-const isIos        = /iphone|ipad|ipod/i.test(navigator.userAgent);
-
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  if (!isStandalone) installStrip.classList.remove("hidden");
-});
-
-installBtn.addEventListener("click", async () => {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  installStrip.classList.add("hidden");
-});
-
-installClose.addEventListener("click", () => installStrip.classList.add("hidden"));
-window.addEventListener("appinstalled", () => installStrip.classList.add("hidden"));
-
-if (isIos && !isStandalone) {
-  installHint.textContent = 'Safari → Поделиться → На экран «Домой»';
-  installBtn.classList.add("hidden");
-  installStrip.classList.remove("hidden");
-}
 
 // ===== START =====
 function startApp(username) {
