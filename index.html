@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d1117">
+  <title>P2PHub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="logo">P2PHub</h1>
+    <span class="status" id="status">не подключено</span>
+  </header>
+
+  <main class="container">
+    <!-- Экран: обмен файлами (заглушка, Этап 3) -->
+    <section class="card">
+      <h2>📁 Файлы</h2>
+      <p class="muted">Передача файлов напрямую через WebTorrent. Появится на Этапе 3.</p>
+      <button class="btn" disabled>Поделиться файлом</button>
+    </section>
+
+    <!-- Экран: чат (заглушка, Этап 4) -->
+    <section class="card">
+      <h2>💬 Чат</h2>
+      <p class="muted">Сообщения напрямую между устройствами через WebRTC. Появится на Этапе 4.</p>
+      <div class="chat-box" id="chat">Здесь будет переписка…</div>
+      <div class="row">
+        <input class="input" type="text" placeholder="Сообщение…" disabled>
+        <button class="btn" disabled>Отправить</button>
+      </div>
+    </section>
+
+    <section class="card info">
+      <h2>ℹ️ О проекте</h2>
+      <p class="muted">
+        Децентрализованный обмен сообщениями и файлами без сервера.
+        Это пока каркас (Этап 1) — функции добавляются по
+        <a href="docs/ROADMAP.md">дорожной карте</a>.
+      </p>
+    </section>
+  </main>
+
+  <footer class="footer muted">P2PHub · этап 1 · каркас</footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
