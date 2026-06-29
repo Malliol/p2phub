@@ -1,5 +1,7 @@
 import { registerUser, loginUser, getCurrentUser, logout } from "./auth.js";
 
+let currentUsername = null;
+
 // ===== AUTH =====
 const authScreen   = document.getElementById("authScreen");
 const appScreen    = document.getElementById("appScreen");
@@ -75,7 +77,6 @@ function showToast(text, type) {
 
 // ===== CHAT =====
 let ws = null;
-let currentUsername = null;
 
 const wsStatus    = document.getElementById("wsStatus");
 const connDot     = document.getElementById("connDot");
