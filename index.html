@@ -6,10 +6,8 @@
   <meta name="theme-color" content="#0d1117">
   <title>ОСГОворим</title>
 
-  <!-- PWA: манифест и иконки -->
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.png">
-  <!-- iOS: разрешает запуск как приложение и задаёт иконку на главном экране -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ОСГОворим">
@@ -18,92 +16,130 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="topbar">
-    <h1 class="logo">ОСГОворим</h1>
-    <span class="status" id="status">не подключено</span>
-  </header>
 
-  <main class="container">
-    <!-- Экран: обмен файлами (WebTorrent, Этап 3) -->
-    <section class="card">
-      <h2>📁 Файлы</h2>
-      <p class="muted">Передача файлов напрямую между устройствами через WebTorrent.</p>
+  <!-- ===== ЭКРАН АВТОРИЗАЦИИ ===== -->
+  <div id="authScreen" class="auth-screen">
+    <div class="auth-card">
+      <h1 class="auth-logo">ОСГОворим</h1>
+      <p class="auth-sub muted">P2P мессенджер</p>
 
-      <!-- Раздать файл -->
-      <h3 class="subhead">Поделиться</h3>
-      <input type="file" id="fileInput" hidden>
-      <button class="btn" id="shareBtn">Выбрать файл и раздать</button>
-      <div id="seedInfo" class="hidden">
-        <p class="muted" id="seedStatus"></p>
-        <textarea class="input mono" id="magnetOut" rows="3" readonly></textarea>
-        <div class="row">
-          <button class="btn btn-sm" id="copyBtn">Скопировать ссылку</button>
-        </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin">Вход</button>
+        <button class="auth-tab" id="tabRegister">Регистрация</button>
       </div>
 
-      <!-- Скачать файл -->
-      <h3 class="subhead">Получить</h3>
-      <textarea class="input mono" id="magnetIn" rows="2"
-        placeholder="Вставь сюда magnet-ссылку…"></textarea>
-      <div class="row">
-        <button class="btn btn-sm" id="downloadBtn">Скачать</button>
-      </div>
-      <div id="dlInfo" class="hidden">
-        <div class="progress"><div class="progress-bar" id="dlBar"></div></div>
-        <p class="muted" id="dlStatus"></p>
-        <div id="dlResult"></div>
-      </div>
-    </section>
+      <form id="authForm" autocomplete="on">
+        <label class="auth-label">Логин</label>
+        <input class="input auth-input" id="authUsername" type="text"
+          placeholder="ваш_логин" autocomplete="username" required>
 
-    <!-- Экран: чат (WebRTC через PeerJS, Этап 4) -->
-    <section class="card">
-      <h2>💬 Чат</h2>
-      <p class="muted">Сообщения напрямую между устройствами через WebRTC.</p>
+        <label class="auth-label">Пароль</label>
+        <input class="input auth-input" id="authPassword" type="password"
+          placeholder="••••••••" autocomplete="current-password" required>
 
-      <h3 class="subhead">Твой ID</h3>
-      <div class="row">
-        <input class="input mono" id="myId" readonly value="получаю…">
-        <button class="btn btn-sm" id="copyIdBtn">Копировать</button>
-      </div>
-      <p class="muted">Отправь этот ID другу — по нему он к тебе подключится.</p>
+        <p class="auth-error hidden" id="authError"></p>
 
-      <h3 class="subhead">Подключиться к другу</h3>
-      <div class="row">
-        <input class="input mono" id="peerId" placeholder="ID друга…">
-        <button class="btn btn-sm" id="connectBtn">Подключиться</button>
-      </div>
-      <p class="muted" id="connStatus">не подключено</p>
-
-      <div class="chat-box" id="chat"></div>
-      <div class="row">
-        <input class="input" id="msgInput" type="text" placeholder="Сообщение…">
-        <button class="btn" id="sendBtn">Отправить</button>
-      </div>
-    </section>
-
-    <section class="card info">
-      <h2>ℹ️ О проекте</h2>
-      <p class="muted">
-        Децентрализованный обмен сообщениями и файлами без сервера.
-        Это пока каркас (Этап 1) — функции добавляются по
-        <a href="docs/ROADMAP.md">дорожной карте</a>.
-      </p>
-    </section>
-  </main>
-
-  <!-- Кнопка установки приложения (PWA). Появляется, только если установка
-       доступна и приложение ещё не установлено. -->
-  <div id="installBar" class="install-bar hidden">
-    <button class="btn" id="installBtn">⬇️ Установить приложение</button>
-    <p class="muted" id="installHint"></p>
+        <button class="btn auth-submit" id="authSubmit" type="submit">Войти</button>
+      </form>
+    </div>
   </div>
 
-  <footer class="footer muted">ОСГОворим · P2P обмен файлами и сообщениями</footer>
+  <!-- ===== ОСНОВНОЕ ПРИЛОЖЕНИЕ ===== -->
+  <div id="appScreen" class="hidden">
 
-  <!-- Библиотека WebTorrent (торрент в браузере). UMD-сборка v1.9.7 —
-       создаёт глобальную переменную WebTorrent для обычного <script>. -->
+    <!-- Кнопка «Пиздец» — сверху по центру -->
+    <div class="pizdets-wrap">
+      <button class="pizdets-btn" id="pizdetsBtn" title="Отправить уведомление всем">
+        Пиздец
+      </button>
+    </div>
+
+    <header class="topbar">
+      <h1 class="logo">ОСГОворим</h1>
+      <div class="topbar-right">
+        <span class="status" id="status">не подключено</span>
+        <button class="btn btn-sm btn-ghost" id="logoutBtn">Выйти</button>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- Кто вошёл -->
+      <div class="user-badge" id="userBadge"></div>
+
+      <!-- Файлы -->
+      <section class="card">
+        <h2>📁 Файлы</h2>
+        <p class="muted">Передача файлов напрямую между устройствами через WebTorrent.</p>
+
+        <h3 class="subhead">Поделиться</h3>
+        <input type="file" id="fileInput" hidden>
+        <button class="btn" id="shareBtn">Выбрать файл и раздать</button>
+        <div id="seedInfo" class="hidden">
+          <p class="muted" id="seedStatus"></p>
+          <textarea class="input mono" id="magnetOut" rows="3" readonly></textarea>
+          <div class="row">
+            <button class="btn btn-sm" id="copyBtn">Скопировать ссылку</button>
+          </div>
+        </div>
+
+        <h3 class="subhead">Получить</h3>
+        <textarea class="input mono" id="magnetIn" rows="2"
+          placeholder="Вставь сюда magnet-ссылку…"></textarea>
+        <div class="row">
+          <button class="btn btn-sm" id="downloadBtn">Скачать</button>
+        </div>
+        <div id="dlInfo" class="hidden">
+          <div class="progress"><div class="progress-bar" id="dlBar"></div></div>
+          <p class="muted" id="dlStatus"></p>
+          <div id="dlResult"></div>
+        </div>
+      </section>
+
+      <!-- Чат -->
+      <section class="card">
+        <h2>💬 Чат</h2>
+        <p class="muted">Сообщения напрямую через WebRTC.</p>
+
+        <h3 class="subhead">Твой ID</h3>
+        <div class="row">
+          <input class="input mono" id="myId" readonly value="получаю…">
+          <button class="btn btn-sm" id="copyIdBtn">Копировать</button>
+        </div>
+        <p class="muted">Отправь этот ID другу — по нему он к тебе подключится.</p>
+
+        <h3 class="subhead">Подключиться к другу</h3>
+        <div class="row">
+          <input class="input mono" id="peerId" placeholder="ID друга…">
+          <button class="btn btn-sm" id="connectBtn">Подключиться</button>
+        </div>
+        <p class="muted" id="connStatus">не подключено</p>
+
+        <div class="chat-box" id="chat"></div>
+        <div class="row">
+          <input class="input" id="msgInput" type="text" placeholder="Сообщение…">
+          <button class="btn" id="sendBtn">Отправить</button>
+        </div>
+      </section>
+
+      <section class="card info">
+        <h2>ℹ️ О проекте</h2>
+        <p class="muted">
+          Децентрализованный обмен сообщениями и файлами без сервера.
+          <a href="docs/ROADMAP.md">Дорожная карта</a>.
+        </p>
+      </section>
+    </main>
+
+    <div id="installBar" class="install-bar hidden">
+      <button class="btn" id="installBtn">⬇️ Установить приложение</button>
+      <p class="muted" id="installHint"></p>
+    </div>
+
+    <footer class="footer muted">ОСГОворим · P2P обмен файлами и сообщениями</footer>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/webtorrent@1.9.7/webtorrent.min.js"></script>
-  <!-- PeerJS: простой WebRTC + публичный signaling-сервер для знакомства пиров -->
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script type="module" src="app.js"></script>
 </body>
