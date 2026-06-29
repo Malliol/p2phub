@@ -1,8 +1,9 @@
 #!/bin/bash
 # Прокидываем admin API через nginx /admin -> :3001
 
-# Запускаем admin.js если не запущен
+# Скачиваем и запускаем admin.js
 pkill -f admin.js 2>/dev/null; sleep 1
+curl -fsSL https://raw.githubusercontent.com/Malliol/p2phub/claude/explore-project-repo-c86qmc/admin.js -o /var/www/p2phub/admin.js
 node /var/www/p2phub/admin.js &
 sleep 1
 echo "admin.js PID: $(pgrep -f admin.js)"
