@@ -1,6 +1,14 @@
-// app.js — логика ОСГОворим.
-// Этап 1: пока пусто, только проверка, что скрипт подключён.
-// Дальше здесь появятся модули файлов (WebTorrent) и сообщений (WebRTC).
+// app.js — логика ОСГОворим (ES-модуль).
+// Чистые функции вынесены в lib.js (их покрывают тесты), здесь — работа
+// с DOM, WebTorrent (файлы) и PeerJS (чат).
+
+import {
+  fmtBytes,
+  escapeHtml,
+  isMagnetUri,
+  trimHistory,
+  parseHistory,
+} from "./lib.js";
 
 console.log("ОСГОворим: приложение загружено.");
 
@@ -39,13 +47,6 @@ function getTorrentClient() {
     wt = new WebTorrent();
   }
   return wt;
-}
-
-function fmtBytes(n) {
-  if (!n) return "0 Б";
-  const u = ["Б", "КБ", "МБ", "ГБ"];
-  const i = Math.floor(Math.log(n) / Math.log(1024));
-  return (n / Math.pow(1024, i)).toFixed(1) + " " + u[i];
 }
 
 // --- Раздача файла ---
@@ -104,7 +105,11 @@ const dlResult = document.getElementById("dlResult");
 if (downloadBtn)
   downloadBtn.addEventListener("click", () => {
     const uri = magnetIn.value.trim();
-    if (!uri) {
+    if (!uri) return;
+    if (!isMagnetUri(uri)) {
+      dlInfo.classList.remove("hidden");
+      dlStatus.innerHTML =
+        '<span class="err">Это не похоже на magnet-ссылку.</span>';
       return;
     }
     try {
@@ -158,16 +163,12 @@ let peer = null; // наш узел в сети PeerJS
 let conn = null; // текущее соединение с собеседником
 
 // --- история чата (хранится локально в браузере) ---
-const HISTORY_KEY = "p2phub-chat";
+const HISTORY_KEY = "osgovorim-chat";
 function loadHistory() {
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
-  } catch {
-    return [];
-  }
+  return parseHistory(localStorage.getItem(HISTORY_KEY));
 }
 function saveHistory(list) {
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(-200)));
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(trimHistory(list)));
 }
 function renderMsg(text, who) {
   const div = document.createElement("div");
@@ -177,11 +178,6 @@ function renderMsg(text, who) {
     escapeHtml(text);
   chatEl.appendChild(div);
   chatEl.scrollTop = chatEl.scrollHeight;
-}
-function escapeHtml(s) {
-  const d = document.createElement("div");
-  d.textContent = s;
-  return d.innerHTML;
 }
 function addMessage(text, who) {
   renderMsg(text, who);

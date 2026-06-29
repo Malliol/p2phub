@@ -1,0 +1,10 @@
+{
+  "name": "osgovorim",
+  "version": "0.1.0",
+  "description": "Децентрализованный обмен сообщениями и файлами (WebTorrent + WebRTC), PWA",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  }
+}
