@@ -1,6 +1,6 @@
 // server.js — WebSocket чат-сервер. Все подключённые пользователи в одной комнате.
-const http = require('http');
-const { WebSocketServer } = require('ws');
+import http from 'http';
+import { WebSocketServer } from 'ws';
 
 const PORT = 3000;
 const clients = new Map(); // ws -> { username, color, id }
