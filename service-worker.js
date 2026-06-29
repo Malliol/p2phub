@@ -1,18 +1,12 @@
-const CACHE = "osgovorim-v7";
+const CACHE = "osgovorim-v8";
 
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./style.css",
-  "./app.js",
-  "./auth.js",
-  "./manifest.json",
+const PRECACHE = [
   "./icons/icon-192.png",
   "./icons/icon-512.png",
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
+  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)));
   self.skipWaiting();
 });
 
@@ -28,21 +22,35 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
-  const sameOrigin = new URL(req.url).origin === self.location.origin;
-  if (!sameOrigin) return;
-  event.respondWith(
-    caches.match(req).then((cached) => {
-      if (cached) return cached;
-      return fetch(req).then((resp) => {
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+
+  const isCode = /\.(js|css|html)$/.test(url.pathname) || url.pathname === "/" || url.pathname === "";
+
+  if (isCode) {
+    // network-first: всегда берём свежий код, кеш только при офлайне
+    event.respondWith(
+      fetch(req).then((resp) => {
         const copy = resp.clone();
         caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
         return resp;
-      }).catch(() => cached);
-    })
-  );
+      }).catch(() => caches.match(req))
+    );
+  } else {
+    // cache-first: картинки и иконки из кеша
+    event.respondWith(
+      caches.match(req).then((cached) => {
+        if (cached) return cached;
+        return fetch(req).then((resp) => {
+          const copy = resp.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          return resp;
+        });
+      })
+    );
+  }
 });
 
-// Push-уведомления (когда приложение закрыто)
 self.addEventListener("push", (event) => {
   let data = { title: "⚠️ ПИЗДЕЦ!", body: "Кто-то нажал кнопку", icon: "./icons/icon-192.png" };
   try { data = { ...data, ...event.data.json() }; } catch {}
