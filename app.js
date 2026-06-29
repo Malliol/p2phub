@@ -264,3 +264,50 @@ if (msgInput)
 
 // запускаем узел чата при загрузке (нужен интернет для signaling)
 if (myIdEl) initPeer();
+
+// ===================== КНОПКА УСТАНОВКИ ПРИЛОЖЕНИЯ (PWA) =====================
+const installBar = document.getElementById("installBar");
+const installBtn = document.getElementById("installBtn");
+const installHint = document.getElementById("installHint");
+
+// уже запущено как установленное приложение?
+const isStandalone =
+  window.matchMedia("(display-mode: standalone)").matches ||
+  window.navigator.standalone === true;
+
+const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+let deferredPrompt = null;
+
+// Android / десктоп Chrome: браузер сообщает, что установка доступна.
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (installBar && !isStandalone) {
+    installBtn.style.display = "";
+    installHint.textContent = "";
+    installBar.classList.remove("hidden");
+  }
+});
+
+if (installBtn)
+  installBtn.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installBar.classList.add("hidden");
+  });
+
+// после установки прячем панель
+window.addEventListener("appinstalled", () => {
+  if (installBar) installBar.classList.add("hidden");
+});
+
+// iPhone (Safari): системного окна установки нет — показываем инструкцию.
+if (installBar && isIos && !isStandalone) {
+  installBtn.style.display = "none";
+  installHint.textContent =
+    'Установить на iPhone: кнопка «Поделиться» → «На экран «Домой»».';
+  installBar.classList.remove("hidden");
+}

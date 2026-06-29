@@ -91,6 +91,13 @@
     </section>
   </main>
 
+  <!-- Кнопка установки приложения (PWA). Появляется, только если установка
+       доступна и приложение ещё не установлено. -->
+  <div id="installBar" class="install-bar hidden">
+    <button class="btn" id="installBtn">⬇️ Установить приложение</button>
+    <p class="muted" id="installHint"></p>
+  </div>
+
   <footer class="footer muted">ОСГОворим · P2P обмен файлами и сообщениями</footer>
 
   <!-- Библиотека WebTorrent (торрент в браузере). UMD-сборка v1.9.7 —
