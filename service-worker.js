@@ -1,7 +1,7 @@
 // service-worker.js — кэширует «оболочку» приложения, чтобы ОСГОворим
 // открывался даже без интернета (Этап 2).
 
-const CACHE = "osgovorim-v3";
+const CACHE = "osgovorim-v4";
 
 // Файлы самого приложения (всё своё, без CDN — их кэшируем заранее).
 const ASSETS = [
@@ -9,7 +9,7 @@ const ASSETS = [
   "./index.html",
   "./style.css",
   "./app.js",
-  "./lib.js",
+  "./auth.js",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
