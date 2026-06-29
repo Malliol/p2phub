@@ -7,7 +7,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const webpush = require('web-push');
 
-const PORT = 3000;
+export const PORT = 3000;
 const USERS_FILE = './users.json';
 const SUBS_FILE  = './subscriptions.json';
 const clients = new Map();
@@ -18,12 +18,12 @@ const VAPID_PRIVATE = 'DJIPQjrE5ajP9zYQbZbs-WlVSfehLROfdYCKUeYYlYs';
 
 webpush.setVapidDetails('mailto:admin@osgovorim.local', VAPID_PUBLIC, VAPID_PRIVATE);
 
-function loadUsers() {
+export function loadUsers() {
   if (!existsSync(USERS_FILE)) return {};
   try { return JSON.parse(readFileSync(USERS_FILE, 'utf8')); } catch { return {}; }
 }
-function saveUsers(users) { writeFileSync(USERS_FILE, JSON.stringify(users, null, 2)); }
-function hash(str) { return createHash('sha256').update(str).digest('hex'); }
+export function saveUsers(users) { writeFileSync(USERS_FILE, JSON.stringify(users, null, 2)); }
+export function hash(str) { return createHash('sha256').update(str).digest('hex'); }
 
 function loadSubs() {
   if (!existsSync(SUBS_FILE)) return [];
@@ -31,17 +31,17 @@ function loadSubs() {
 }
 function saveSubs(subs) { writeFileSync(SUBS_FILE, JSON.stringify(subs, null, 2)); }
 
-function pushToAll(payload) {
+async function pushToAll(payload) {
   const subs = loadSubs();
-  const alive = [];
-  for (const sub of subs) {
-    webpush.sendNotification(sub, JSON.stringify(payload)).then(() => {
-      alive.push(sub);
-    }).catch(() => {}); // удалённые подписки игнорируем
-  }
+  const results = await Promise.allSettled(
+    subs.map(sub => webpush.sendNotification(sub, JSON.stringify(payload)).then(() => sub))
+  );
+  // сохраняем только живые подписки
+  const alive = results.filter(r => r.status === 'fulfilled').map(r => r.value);
+  if (alive.length !== subs.length) saveSubs(alive);
 }
 
-const server = http.createServer((req, res) => {
+export const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
 
   if (req.method === 'POST' && url.pathname === '/api/register') {
@@ -92,9 +92,9 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       try {
         const sub = JSON.parse(body);
+        if (!sub.endpoint) return json(res, 400, { error: 'Неверная подписка' });
         const subs = loadSubs();
-        const exists = subs.some(s => s.endpoint === sub.endpoint);
-        if (!exists) { subs.push(sub); saveSubs(subs); }
+        if (!subs.some(s => s.endpoint === sub.endpoint)) { subs.push(sub); saveSubs(subs); }
         json(res, 200, { ok: true });
       } catch { json(res, 400, { error: 'Неверный запрос' }); }
     });
@@ -119,6 +119,7 @@ function kickByUsername(username) {
   for (const [existingWs, existingUser] of clients) {
     if (existingUser.username.toLowerCase() === username.toLowerCase()) {
       send(existingWs, { type: 'kicked' });
+      existingWs._kicked = true; // флаг чтобы close handler не делал лишний broadcast
       existingWs.terminate();
       clients.delete(existingWs);
       break;
@@ -149,10 +150,16 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
-    if (user) { clients.delete(ws); broadcast({ type: 'users', users: getUserList() }); }
+    // если был кикнут — клиент уже удалён, broadcast уже был
+    if (user && !ws._kicked) {
+      clients.delete(ws);
+      broadcast({ type: 'users', users: getUserList() });
+    }
   });
 
   ws.on('error', () => { if (user) clients.delete(ws); });
 });
 
-server.listen(PORT, () => console.log(`Server on :${PORT}`));
+if (process.argv[1] === new URL(import.meta.url).pathname) {
+  server.listen(PORT, () => console.log(`Server on :${PORT}`));
+}
