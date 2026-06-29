@@ -2,11 +2,20 @@
 // Этап 1: пока пусто, только проверка, что скрипт подключён.
 // Дальше здесь появятся модули файлов (WebTorrent) и сообщений (WebRTC).
 
-console.log("P2PHub: каркас загружен (Этап 1).");
+console.log("P2PHub: приложение загружено.");
 
-// Заглушка статуса в шапке — на будущих этапах сюда придёт реальное
-// состояние P2P-соединения (подключено / ищем пиров / офлайн).
 const statusEl = document.getElementById("status");
 if (statusEl) {
-  statusEl.textContent = "каркас (этап 1)";
+  statusEl.textContent = "готов";
+}
+
+// PWA: регистрируем service worker, чтобы приложение можно было установить
+// и открывать офлайн (Этап 2). На file:// не работает — только по http/https.
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("service-worker.js")
+      .then(() => console.log("P2PHub: service worker зарегистрирован."))
+      .catch((err) => console.warn("P2PHub: SW не зарегистрирован:", err));
+  });
 }
