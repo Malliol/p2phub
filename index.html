@@ -24,11 +24,35 @@
   </header>
 
   <main class="container">
-    <!-- Экран: обмен файлами (заглушка, Этап 3) -->
+    <!-- Экран: обмен файлами (WebTorrent, Этап 3) -->
     <section class="card">
       <h2>📁 Файлы</h2>
-      <p class="muted">Передача файлов напрямую через WebTorrent. Появится на Этапе 3.</p>
-      <button class="btn" disabled>Поделиться файлом</button>
+      <p class="muted">Передача файлов напрямую между устройствами через WebTorrent.</p>
+
+      <!-- Раздать файл -->
+      <h3 class="subhead">Поделиться</h3>
+      <input type="file" id="fileInput" hidden>
+      <button class="btn" id="shareBtn">Выбрать файл и раздать</button>
+      <div id="seedInfo" class="hidden">
+        <p class="muted" id="seedStatus"></p>
+        <textarea class="input mono" id="magnetOut" rows="3" readonly></textarea>
+        <div class="row">
+          <button class="btn btn-sm" id="copyBtn">Скопировать ссылку</button>
+        </div>
+      </div>
+
+      <!-- Скачать файл -->
+      <h3 class="subhead">Получить</h3>
+      <textarea class="input mono" id="magnetIn" rows="2"
+        placeholder="Вставь сюда magnet-ссылку…"></textarea>
+      <div class="row">
+        <button class="btn btn-sm" id="downloadBtn">Скачать</button>
+      </div>
+      <div id="dlInfo" class="hidden">
+        <div class="progress"><div class="progress-bar" id="dlBar"></div></div>
+        <p class="muted" id="dlStatus"></p>
+        <div id="dlResult"></div>
+      </div>
     </section>
 
     <!-- Экран: чат (заглушка, Этап 4) -->
@@ -52,8 +76,11 @@
     </section>
   </main>
 
-  <footer class="footer muted">P2PHub · этап 1 · каркас</footer>
+  <footer class="footer muted">P2PHub · P2P обмен файлами и сообщениями</footer>
 
+  <!-- Библиотека WebTorrent (торрент в браузере). UMD-сборка v1.9.7 —
+       создаёт глобальную переменную WebTorrent для обычного <script>. -->
+  <script src="https://cdn.jsdelivr.net/npm/webtorrent@1.9.7/webtorrent.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
