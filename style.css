@@ -111,42 +111,63 @@ body {
 .auth-submit:active { transform: scale(0.98); }
 .auth-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ===== APP ===== */
-.app { display: flex; flex-direction: column; height: 100vh; }
+/* ===== APP LAYOUT ===== */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
 
-/* HEADER */
+/* ===== HEADER ===== */
 .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
+  padding: 0 12px 0 8px;
   height: 56px;
   background: var(--bg2);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   z-index: 10;
 }
-.header-left, .header-right { display: flex; align-items: center; gap: 8px; }
-.header-logo { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+
+.header-left { display: flex; align-items: center; gap: 8px; }
+.header-logo { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+
 .conn-dot {
-  width: 8px; height: 8px;
+  width: 7px; height: 7px;
   border-radius: 50%;
   background: var(--muted);
   transition: background 0.3s;
+  flex-shrink: 0;
 }
 .conn-dot.online { background: var(--ok); }
 .conn-dot.error  { background: var(--danger); }
 .header-status { font-size: 12px; color: var(--muted); }
 
-/* Кнопка ПИЗДЕЦ */
+.icon-btn {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+.icon-btn:hover { background: var(--bg3); color: var(--text); }
+
+/* КНОПКА ПИЗДЕЦ */
 .pizdets-btn {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 999px;
   border: none;
   background: var(--danger);
   color: #fff;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.03em;
   cursor: pointer;
@@ -154,63 +175,59 @@ body {
   transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  text-align: center;
-  line-height: 52px;
+  flex-shrink: 0;
 }
 .pizdets-btn:hover {
   background: var(--danger-dark);
   box-shadow: 0 0 0 5px rgba(218,54,51,0.25), 0 4px 18px rgba(218,54,51,0.45);
-  transform: scale(1.07);
+  transform: scale(1.05);
 }
-.pizdets-btn:active { transform: scale(0.91); }
+.pizdets-btn:active { transform: scale(0.93); }
 .pizdets-btn.fire { animation: pfire 0.35s ease; }
 @keyframes pfire {
   0%  { transform: scale(1); }
-  40% { transform: scale(1.22); }
+  40% { transform: scale(1.2); }
   100%{ transform: scale(1); }
 }
 
-.icon-btn {
-  width: 36px; height: 36px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--muted);
-  font-size: 16px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.12s, color 0.12s;
+/* ===== MENU DRAWER ===== */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 40;
+  opacity: 0;
+  transition: opacity 0.22s;
+  backdrop-filter: blur(2px);
 }
-.icon-btn:hover { background: var(--bg3); color: var(--text); }
+.menu-overlay.open { opacity: 1; }
 
-/* APP BODY */
-.app-body { display: flex; flex: 1; overflow: hidden; }
-
-/* SIDEBAR */
-.sidebar {
-  width: 210px;
+.menu-drawer {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 260px;
   background: var(--bg2);
   border-right: 1px solid var(--border);
+  z-index: 41;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  overflow: hidden;
-  transition: width 0.22s ease;
+  transform: translateX(-100%);
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 4px 0 24px rgba(0,0,0,0.4);
 }
-.sidebar.closed { width: 0; }
+.menu-drawer.open { transform: translateX(0); }
 
-.sidebar-header {
-  padding: 12px 16px;
+.drawer-header {
+  padding: 18px 16px 14px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   color: var(--muted);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   gap: 8px;
-  white-space: nowrap;
 }
 
 .online-badge {
@@ -230,33 +247,59 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 7px 16px;
+  padding: 8px 16px;
   font-size: 13px;
-  white-space: nowrap;
-  overflow: hidden;
 }
 
 .user-avatar {
-  width: 28px; height: 28px;
+  width: 30px; height: 30px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700;
+  font-size: 13px; font-weight: 700;
   color: #fff;
   flex-shrink: 0;
 }
 
-.user-name { overflow: hidden; text-overflow: ellipsis; }
+.user-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
 
-/* CHAT */
-.chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.drawer-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.drawer-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.drawer-logout:hover { background: rgba(218,54,51,0.08); color: #f85149; border-color: rgba(218,54,51,0.3); }
+
+/* ===== CHAT ===== */
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
 
 .messages {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 16px 16px 8px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .messages-empty {
@@ -264,11 +307,10 @@ body {
   color: var(--muted);
   font-size: 14px;
   text-align: center;
-  opacity: 0.5;
+  opacity: 0.45;
 }
 
-/* Сообщения */
-.msg-row { display: flex; flex-direction: column; max-width: 72%; margin: 1px 0; }
+.msg-row { display: flex; flex-direction: column; max-width: 74%; margin: 1px 0; }
 .msg-row.mine  { align-self: flex-end;   align-items: flex-end; }
 .msg-row.theirs{ align-self: flex-start; align-items: flex-start; }
 
@@ -297,9 +339,10 @@ body {
   border: 1px solid var(--border);
   border-bottom-left-radius: 5px;
 }
+
 .msg-time {
   font-size: 10px;
-  opacity: 0.45;
+  opacity: 0.4;
   margin-top: 2px;
   padding: 0 4px;
 }
@@ -308,13 +351,13 @@ body {
   align-self: center;
   font-size: 12px;
   color: var(--muted);
-  padding: 4px 12px;
-  opacity: 0.7;
+  padding: 3px 10px;
+  opacity: 0.6;
 }
 
 .pizdets-msg {
   align-self: center;
-  background: rgba(218,54,51,0.12);
+  background: rgba(218,54,51,0.1);
   border: 1px solid rgba(218,54,51,0.3);
   border-radius: 999px;
   padding: 5px 16px;
@@ -328,10 +371,10 @@ body {
 .input-bar {
   display: flex;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 10px 12px;
   background: var(--bg2);
   border-top: 1px solid var(--border);
-  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  flex-shrink: 0;
 }
 
 .msg-input {
@@ -344,11 +387,12 @@ body {
   font-size: 15px;
   outline: none;
   transition: border-color 0.15s;
+  min-width: 0;
 }
 .msg-input:focus { border-color: var(--accent); }
 
 .send-btn {
-  width: 44px; height: 44px;
+  width: 42px; height: 42px;
   border-radius: 50%;
   border: none;
   background: var(--accent);
@@ -361,57 +405,65 @@ body {
 .send-btn:hover { opacity: 0.88; }
 .send-btn:active { transform: scale(0.9); }
 
-/* INSTALL BANNER */
-.install-banner {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
-  padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+/* ===== INSTALL STRIP (снизу) ===== */
+.install-strip {
   display: flex;
   align-items: center;
-  gap: 12px;
-  z-index: 100;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+  gap: 10px;
+  padding: 10px 14px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
 }
-.install-icon { font-size: 28px; flex-shrink: 0; }
-.install-text { flex: 1; display: flex; flex-direction: column; font-size: 14px; line-height: 1.3; }
-.install-text small { color: var(--muted); font-size: 12px; }
-.install-action {
+
+.install-strip-icon { font-size: 20px; flex-shrink: 0; }
+
+.install-strip-text {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.install-strip-btn {
   background: var(--accent);
   color: #fff;
   border: none;
-  border-radius: 20px;
-  padding: 8px 18px;
-  font-size: 14px;
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   flex-shrink: 0;
   transition: opacity 0.12s;
 }
-.install-action:hover { opacity: 0.88; }
-.install-close {
+.install-strip-btn:hover { opacity: 0.88; }
+
+.install-strip-close {
   background: none;
   border: none;
   color: var(--muted);
   cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
   padding: 4px;
-  flex-shrink: 0;
   line-height: 1;
+  flex-shrink: 0;
 }
 
-/* TOAST */
+/* ===== TOAST ===== */
 .toast {
   position: fixed;
-  top: 68px;
+  top: 66px;
   left: 50%;
   transform: translateX(-50%) translateY(-8px);
   background: var(--danger);
   color: #fff;
   font-size: 13px;
   font-weight: 600;
-  padding: 9px 20px;
+  padding: 8px 18px;
   border-radius: 999px;
   z-index: 9999;
   box-shadow: 0 4px 20px rgba(218,54,51,0.4);
@@ -430,14 +482,8 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
 @media (max-width: 600px) {
-  .sidebar {
-    position: absolute;
-    top: 56px; left: 0; bottom: 0;
-    z-index: 20;
-    box-shadow: 4px 0 20px rgba(0,0,0,0.4);
-  }
-  .sidebar.closed { width: 0; box-shadow: none; }
   .msg-row { max-width: 88%; }
   .auth-card { padding: 28px 20px; }
-  .pizdets-btn { width: 44px; height: 44px; font-size: 10px; line-height: 44px; }
+  .pizdets-btn { height: 36px; padding: 0 14px; font-size: 12px; }
+  .menu-drawer { width: 240px; }
 }

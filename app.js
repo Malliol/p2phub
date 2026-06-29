@@ -48,6 +48,7 @@ authForm.addEventListener("submit", async (e) => {
 logoutBtn.addEventListener("click", () => {
   logout();
   closeWS();
+  closeMenu();
   appScreen.classList.add("hidden");
   authScreen.classList.remove("hidden");
   authPassword.value = "";
@@ -75,6 +76,28 @@ function showToast(text, type) {
   toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3000);
 }
 
+// ===== MENU =====
+const menuToggle  = document.getElementById("menuToggle");
+const menuDrawer  = document.getElementById("menuDrawer");
+const menuOverlay = document.getElementById("menuOverlay");
+
+function openMenu() {
+  menuDrawer.classList.add("open");
+  menuOverlay.classList.remove("hidden");
+  requestAnimationFrame(() => menuOverlay.classList.add("open"));
+}
+
+function closeMenu() {
+  menuDrawer.classList.remove("open");
+  menuOverlay.classList.remove("open");
+  setTimeout(() => menuOverlay.classList.add("hidden"), 230);
+}
+
+menuToggle.addEventListener("click", () => {
+  menuDrawer.classList.contains("open") ? closeMenu() : openMenu();
+});
+menuOverlay.addEventListener("click", closeMenu);
+
 // ===== CHAT =====
 let ws = null;
 
@@ -86,8 +109,6 @@ const sendBtn     = document.getElementById("sendBtn");
 const userList    = document.getElementById("userList");
 const onlineCount = document.getElementById("onlineCount");
 const pizdetsBtn  = document.getElementById("pizdetsBtn");
-const sidebarToggle = document.getElementById("sidebarToggle");
-const sidebar     = document.getElementById("sidebar");
 
 function setStatus(text, state) {
   wsStatus.textContent = text;
@@ -233,38 +254,39 @@ pizdetsBtn.addEventListener("click", () => {
   wsSend({ type: "pizdets" });
   pizdetsBtn.classList.add("fire");
   setTimeout(() => pizdetsBtn.classList.remove("fire"), 400);
-  showToast("Пиздец отправлен всем!");
+  showToast("Пиздец отправлен всем!", "");
 });
 
-sidebarToggle.addEventListener("click", () => sidebar.classList.toggle("closed"));
-
 // ===== PWA INSTALL =====
-const installBanner = document.getElementById("installBanner");
-const installBtn    = document.getElementById("installBtn");
-const installClose  = document.getElementById("installClose");
-const installHint   = document.getElementById("installHint");
-let deferredPrompt  = null;
-const isStandalone  = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
-const isIos         = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const installStrip = document.getElementById("installStrip");
+const installBtn   = document.getElementById("installBtn");
+const installClose = document.getElementById("installClose");
+const installHint  = document.getElementById("installHint");
+let deferredPrompt = null;
+const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+const isIos        = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  if (!isStandalone) installBanner.classList.remove("hidden");
+  if (!isStandalone) installStrip.classList.remove("hidden");
 });
+
 installBtn.addEventListener("click", async () => {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
   await deferredPrompt.userChoice;
   deferredPrompt = null;
-  installBanner.classList.add("hidden");
+  installStrip.classList.add("hidden");
 });
-installClose.addEventListener("click", () => installBanner.classList.add("hidden"));
-window.addEventListener("appinstalled", () => installBanner.classList.add("hidden"));
+
+installClose.addEventListener("click", () => installStrip.classList.add("hidden"));
+window.addEventListener("appinstalled", () => installStrip.classList.add("hidden"));
+
 if (isIos && !isStandalone) {
   installHint.textContent = 'Safari → Поделиться → На экран «Домой»';
   installBtn.classList.add("hidden");
-  installBanner.classList.remove("hidden");
+  installStrip.classList.remove("hidden");
 }
 
 // ===== START =====
