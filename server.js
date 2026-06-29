@@ -73,6 +73,17 @@ function send(ws, data) { if (ws.readyState === 1) ws.send(JSON.stringify(data))
 function broadcast(data) { for (const [ws] of clients) send(ws, data); }
 function getUserList() { return [...clients.values()].map(u => ({ username: u.username, color: u.color })); }
 
+function kickByUsername(username) {
+  for (const [existingWs, existingUser] of clients) {
+    if (existingUser.username.toLowerCase() === username.toLowerCase()) {
+      send(existingWs, { type: 'kicked' });
+      existingWs.terminate();
+      clients.delete(existingWs);
+      break;
+    }
+  }
+}
+
 let colorIdx = 0;
 
 wss.on('connection', (ws) => {
@@ -84,6 +95,7 @@ wss.on('connection', (ws) => {
 
     if (msg.type === 'join') {
       const username = String(msg.username || 'Аноним').slice(0, 32);
+      kickByUsername(username); // закрыть предыдущую сессию если есть
       const color = COLORS[colorIdx++ % COLORS.length];
       user = { username, color };
       clients.set(ws, user);

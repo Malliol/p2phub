@@ -97,13 +97,20 @@ function closeWS() {
   if (ws) { try { ws.close(); } catch {} ws = null; }
 }
 
+let kicked = false;
+
 function connectWS(username) {
   closeWS();
+  kicked = false;
   setStatus("подключение…", "");
   ws = new WebSocket(getWsUrl());
   ws.onopen    = () => ws.send(JSON.stringify({ type: "join", username }));
   ws.onmessage = (e) => { try { handleMsg(JSON.parse(e.data)); } catch {} };
-  ws.onclose   = () => { setStatus("нет соединения", "error"); setTimeout(() => connectWS(username), 3000); };
+  ws.onclose   = () => {
+    if (kicked) return;
+    setStatus("нет соединения", "error");
+    setTimeout(() => connectWS(username), 3000);
+  };
   ws.onerror   = () => setStatus("ошибка", "error");
 }
 
@@ -153,6 +160,15 @@ function handleMsg(msg) {
         new Notification("⚠️ ПИЗДЕЦ!", { body: `Сигнал от ${msg.username}` });
       }
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      break;
+    case "kicked":
+      kicked = true;
+      closeWS();
+      logout();
+      appScreen.classList.add("hidden");
+      authScreen.classList.remove("hidden");
+      authError.textContent = "Вход выполнен с другого устройства";
+      authError.classList.remove("hidden");
       break;
   }
 }
