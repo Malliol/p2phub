@@ -1,4 +1,4 @@
-const CACHE = "osgovorim-v6";
+const CACHE = "osgovorim-v7";
 
 const ASSETS = [
   "./",
