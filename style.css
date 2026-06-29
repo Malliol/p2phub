@@ -125,7 +125,8 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  height: 52px;
+  padding-top: env(safe-area-inset-top);
+  height: calc(52px + env(safe-area-inset-top));
   background: var(--bg2);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -166,8 +167,9 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 48px;
+  gap: 40px;
   padding: 40px 20px;
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
   overflow-y: auto;
 }
 
@@ -323,6 +325,22 @@ body {
 .hidden { display: none !important; }
 
 @media (max-width: 480px) {
-  .pizdets-btn { width: 150px; height: 150px; font-size: 18px; }
-  .auth-card { padding: 28px 20px; }
+  .auth-screen { padding: 16px; padding-top: calc(16px + env(safe-area-inset-top)); }
+  .auth-card { padding: 28px 20px; border-radius: 16px; }
+
+  .pizdets-btn {
+    width: 200px;
+    height: 200px;
+    font-size: 20px;
+  }
+
+  .main { gap: 32px; padding: 24px 16px; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+
+  .online-box { max-width: 100%; }
+  .install-btn { max-width: 100%; }
+
+  .logout-btn span { display: none; }
+  .logout-btn { padding: 10px 12px; }
+
+  .header-logo { font-size: 14px; }
 }

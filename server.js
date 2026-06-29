@@ -33,12 +33,18 @@ function saveSubs(subs) { writeFileSync(SUBS_FILE, JSON.stringify(subs, null, 2)
 
 async function pushToAll(payload) {
   const subs = loadSubs();
-  const results = await Promise.allSettled(
-    subs.map(sub => webpush.sendNotification(sub, JSON.stringify(payload)).then(() => sub))
+  const dead = new Set();
+  await Promise.allSettled(
+    subs.map(async (sub) => {
+      try {
+        await webpush.sendNotification(sub, JSON.stringify(payload));
+      } catch (err) {
+        // удаляем только если подписка явно истекла (410) или не найдена (404)
+        if (err.statusCode === 410 || err.statusCode === 404) dead.add(sub.endpoint);
+      }
+    })
   );
-  // сохраняем только живые подписки
-  const alive = results.filter(r => r.status === 'fulfilled').map(r => r.value);
-  if (alive.length !== subs.length) saveSubs(alive);
+  if (dead.size > 0) saveSubs(subs.filter(s => !dead.has(s.endpoint)));
 }
 
 export const server = http.createServer((req, res) => {
