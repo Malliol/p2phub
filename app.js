@@ -105,7 +105,12 @@ function getWsUrl() {
 }
 
 function closeWS() {
-  if (ws) { try { ws.close(); } catch {} ws = null; }
+  if (ws) {
+    ws.onclose = null;
+    ws.onerror = null;
+    try { ws.close(); } catch {}
+    ws = null;
+  }
 }
 
 let kicked = false;
