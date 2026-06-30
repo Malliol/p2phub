@@ -2,7 +2,7 @@ import { describe, it, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { rmSync, existsSync } from 'node:fs';
 import { WebSocket } from 'ws';
-import { server, loadUsers, saveUsers, hash } from '../server.js';
+import { server } from '../server.js';
 
 const PORT = 3099; // тестовый порт
 const BASE = `http://localhost:${PORT}`;
@@ -73,92 +73,8 @@ before(() => new Promise((resolve, reject) => {
 
 after(() => new Promise((resolve) => {
   server.close(resolve);
-  ['./users.json', './subscriptions.json'].forEach(f => {
-    if (existsSync(f)) rmSync(f);
-  });
+  if (existsSync('./subscriptions.json')) rmSync('./subscriptions.json');
 }));
-
-beforeEach(() => {
-  // чистим пользователей перед каждым тестом
-  if (existsSync('./users.json')) rmSync('./users.json');
-});
-
-// ===== REGISTER =====
-
-describe('POST /api/register', () => {
-  it('создаёт пользователя', async () => {
-    const { status, body } = await post('/api/register', { username: 'Карыч', password: '1234' });
-    assert.equal(status, 200);
-    assert.equal(body.ok, true);
-    assert.equal(body.username, 'Карыч');
-  });
-
-  it('сохраняет хеш пароля, не сам пароль', async () => {
-    await post('/api/register', { username: 'Карыч', password: '1234' });
-    const users = loadUsers();
-    assert.ok(users['карыч'].hash);
-    assert.notEqual(users['карыч'].hash, '1234');
-    assert.equal(users['карыч'].hash, hash('1234'));
-  });
-
-  it('отклоняет дубль логина', async () => {
-    await post('/api/register', { username: 'Карыч', password: '1234' });
-    const { status, body } = await post('/api/register', { username: 'карыч', password: 'другой' });
-    assert.equal(status, 409);
-    assert.ok(body.error);
-  });
-
-  it('отклоняет короткий логин', async () => {
-    const { status } = await post('/api/register', { username: 'А', password: '1234' });
-    assert.equal(status, 400);
-  });
-
-  it('отклоняет короткий пароль', async () => {
-    const { status } = await post('/api/register', { username: 'Карыч', password: '123' });
-    assert.equal(status, 400);
-  });
-
-  it('отклоняет пустое тело', async () => {
-    const { status } = await post('/api/register', {});
-    assert.equal(status, 400);
-  });
-});
-
-// ===== LOGIN =====
-
-describe('POST /api/login', () => {
-  beforeEach(async () => {
-    await post('/api/register', { username: 'Карыч', password: '1234' });
-  });
-
-  it('пускает с верным паролем', async () => {
-    const { status, body } = await post('/api/login', { username: 'Карыч', password: '1234' });
-    assert.equal(status, 200);
-    assert.equal(body.ok, true);
-    assert.equal(body.username, 'Карыч');
-  });
-
-  it('логин регистронезависимый', async () => {
-    const { status, body } = await post('/api/login', { username: 'КАРЫЧ', password: '1234' });
-    assert.equal(status, 200);
-    assert.equal(body.username, 'Карыч');
-  });
-
-  it('отклоняет неверный пароль', async () => {
-    const { status } = await post('/api/login', { username: 'Карыч', password: 'неверный' });
-    assert.equal(status, 401);
-  });
-
-  it('отклоняет несуществующего пользователя', async () => {
-    const { status } = await post('/api/login', { username: 'Кто-то', password: '1234' });
-    assert.equal(status, 401);
-  });
-
-  it('отклоняет пустое тело', async () => {
-    const { status } = await post('/api/login', {});
-    assert.equal(status, 400);
-  });
-});
 
 // ===== VAPID =====
 

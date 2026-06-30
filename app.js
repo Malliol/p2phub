@@ -1,4 +1,4 @@
-import { registerUser, loginUser, getCurrentUser, logout } from "./auth.js";
+import { setCurrentUser, getCurrentUser, logout } from "./auth.js";
 
 let currentUsername = null;
 
@@ -6,43 +6,22 @@ let currentUsername = null;
 const authScreen   = document.getElementById("authScreen");
 const appScreen    = document.getElementById("appScreen");
 const authForm     = document.getElementById("authForm");
-const tabLogin     = document.getElementById("tabLogin");
-const tabRegister  = document.getElementById("tabRegister");
 const authUsername = document.getElementById("authUsername");
-const authPassword = document.getElementById("authPassword");
 const authError    = document.getElementById("authError");
 const authSubmit   = document.getElementById("authSubmit");
 const logoutBtn    = document.getElementById("logoutBtn");
 
-let isRegisterMode = false;
-
-function setAuthMode(reg) {
-  isRegisterMode = reg;
-  tabLogin.classList.toggle("active", !reg);
-  tabRegister.classList.toggle("active", reg);
-  authSubmit.textContent = reg ? "Зарегистрироваться" : "Войти";
-  authError.classList.add("hidden");
-  authPassword.autocomplete = reg ? "new-password" : "current-password";
-}
-tabLogin.addEventListener("click",    () => setAuthMode(false));
-tabRegister.addEventListener("click", () => setAuthMode(true));
-
-authForm.addEventListener("submit", async (e) => {
+authForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  authSubmit.disabled = true;
   authError.classList.add("hidden");
-  try {
-    const u = authUsername.value.trim();
-    const p = authPassword.value;
-    if (isRegisterMode) { await registerUser(u, p); }
-    await loginUser(u, p);
-    startApp(getCurrentUser());
-  } catch (err) {
-    authError.textContent = err.message;
+  const u = authUsername.value.trim();
+  if (!u) {
+    authError.textContent = "Введи ник";
     authError.classList.remove("hidden");
-  } finally {
-    authSubmit.disabled = false;
+    return;
   }
+  setCurrentUser(u);
+  startApp(u);
 });
 
 logoutBtn.addEventListener("click", () => {
@@ -50,7 +29,7 @@ logoutBtn.addEventListener("click", () => {
   closeWS();
   appScreen.classList.add("hidden");
   authScreen.classList.remove("hidden");
-  authPassword.value = "";
+  authUsername.value = "";
 });
 
 const existingUser = getCurrentUser();

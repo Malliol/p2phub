@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ОСГОворим">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -21,20 +21,12 @@
       <div class="auth-logo-wrap">
         <div class="auth-icon">🚨</div>
         <h1 class="auth-logo">ОСГОворим</h1>
-        <p class="auth-sub">Войди чтобы участвовать</p>
-      </div>
-      <div class="auth-tabs">
-        <button class="auth-tab active" id="tabLogin">Вход</button>
-        <button class="auth-tab" id="tabRegister">Регистрация</button>
+        <p class="auth-sub">Введи ник чтобы зайти</p>
       </div>
       <form id="authForm" autocomplete="on">
         <div class="field-group">
-          <label class="field-label">Логин</label>
-          <input class="field-input" id="authUsername" type="text" placeholder="введи логин" autocomplete="username" required>
-        </div>
-        <div class="field-group">
-          <label class="field-label">Пароль</label>
-          <input class="field-input" id="authPassword" type="password" placeholder="••••••••" autocomplete="current-password" required>
+          <label class="field-label">Ник</label>
+          <input class="field-input" id="authUsername" type="text" placeholder="введи ник" autocomplete="username" required>
         </div>
         <p class="auth-error hidden" id="authError"></p>
         <button class="auth-submit" id="authSubmit" type="submit">Войти</button>

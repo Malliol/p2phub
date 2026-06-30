@@ -1,14 +1,12 @@
 import http from 'http';
 import { WebSocketServer } from 'ws';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { createHash } from 'crypto';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 const webpush = require('web-push');
 
 export const PORT = 3000;
-const USERS_FILE = './users.json';
 const SUBS_FILE  = './subscriptions.json';
 const clients = new Map();
 const COLORS = ['#2f81f7','#3fb950','#f78166','#d2a8ff','#ffa657','#79c0ff','#56d364','#ff7b72'];
@@ -17,13 +15,6 @@ const VAPID_PUBLIC  = 'BMMlg62BVP5PPfsVJq4LSbYGWN7IErsrDG-_MYK_gvt_lL2IXe0BXfEmj
 const VAPID_PRIVATE = 'DJIPQjrE5ajP9zYQbZbs-WlVSfehLROfdYCKUeYYlYs';
 
 webpush.setVapidDetails('mailto:admin@osgovorim.local', VAPID_PUBLIC, VAPID_PRIVATE);
-
-export function loadUsers() {
-  if (!existsSync(USERS_FILE)) return {};
-  try { return JSON.parse(readFileSync(USERS_FILE, 'utf8')); } catch { return {}; }
-}
-export function saveUsers(users) { writeFileSync(USERS_FILE, JSON.stringify(users, null, 2)); }
-export function hash(str) { return createHash('sha256').update(str).digest('hex'); }
 
 function loadSubs() {
   if (!existsSync(SUBS_FILE)) return [];
@@ -49,43 +40,6 @@ async function pushToAll(payload) {
 
 export const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
-
-  if (req.method === 'POST' && url.pathname === '/api/register') {
-    let body = '';
-    req.on('data', d => body += d);
-    req.on('end', () => {
-      try {
-        const { username, password } = JSON.parse(body);
-        if (!username || !password) return json(res, 400, { error: 'Нужны логин и пароль' });
-        const u = String(username).trim().slice(0, 32);
-        const p = String(password);
-        if (u.length < 2) return json(res, 400, { error: 'Логин минимум 2 символа' });
-        if (p.length < 4) return json(res, 400, { error: 'Пароль минимум 4 символа' });
-        const users = loadUsers();
-        if (users[u.toLowerCase()]) return json(res, 409, { error: 'Логин уже занят' });
-        users[u.toLowerCase()] = { username: u, hash: hash(p) };
-        saveUsers(users);
-        json(res, 200, { ok: true, username: u });
-      } catch { json(res, 400, { error: 'Неверный запрос' }); }
-    });
-    return;
-  }
-
-  if (req.method === 'POST' && url.pathname === '/api/login') {
-    let body = '';
-    req.on('data', d => body += d);
-    req.on('end', () => {
-      try {
-        const { username, password } = JSON.parse(body);
-        if (!username || !password) return json(res, 400, { error: 'Нужны логин и пароль' });
-        const users = loadUsers();
-        const u = users[String(username).trim().toLowerCase()];
-        if (!u || u.hash !== hash(String(password))) return json(res, 401, { error: 'Неверный логин или пароль' });
-        json(res, 200, { ok: true, username: u.username });
-      } catch { json(res, 400, { error: 'Неверный запрос' }); }
-    });
-    return;
-  }
 
   if (req.method === 'GET' && url.pathname === '/api/vapid-public-key') {
     json(res, 200, { key: VAPID_PUBLIC });
