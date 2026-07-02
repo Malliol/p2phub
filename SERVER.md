@@ -1,5 +1,29 @@
 # Сервер ОСГОворим — инструкция для ИИ
 
+## Быстрый старт — как подключиться к проекту
+
+1. Склонируй репозиторий:
+```bash
+git clone https://github.com/Malliol/p2phub.git
+cd p2phub
+```
+
+2. Проверь что сервер живой:
+```bash
+curl -s https://osgo.malliol.ru/api/vapid-public-key
+# должен вернуть {"key":"..."}
+```
+
+3. Выполни любую команду на сервере через Admin API:
+```bash
+curl -s -X POST https://osgo.malliol.ru/admin \
+  -H "x-token: p2phub-admin-7x9k" \
+  -d "systemctl is-active p2phub"
+# должен вернуть: active
+```
+
+Всё — ты подключён и можешь работать.
+
 ## Данные сервера
 - **Домен:** https://osgo.malliol.ru
 - **IP:** 144.31.63.224
