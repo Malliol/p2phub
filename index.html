@@ -2,76 +2,210 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0d1117">
-  <title>ОСГОворим</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f0e8">
+  <title>Первая помощь — Методичка</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="ОСГОворим">
+  <meta name="apple-mobile-web-app-title" content="Первая помощь">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap">
+  <link rel="stylesheet" href="book.css">
 </head>
 <body>
 
-  <!-- АВТОРИЗАЦИЯ -->
-  <div id="authScreen" class="auth-screen">
-    <div class="auth-card">
-      <div class="auth-logo-wrap">
-        <div class="auth-icon">🚨</div>
-        <h1 class="auth-logo">ОСГОворим</h1>
-        <p class="auth-sub">Введи ник чтобы зайти</p>
-      </div>
-      <form id="authForm" autocomplete="on">
-        <div class="field-group">
-          <label class="field-label">Ник</label>
-          <input class="field-input" id="authUsername" type="text" placeholder="введи ник" autocomplete="username" required>
+  <!-- ОБЛОЖКА -->
+  <div class="cover">
+    <div class="cover-inner">
+      <div class="cover-cross">✚</div>
+      <h1 class="cover-title">Первая<br>помощь</h1>
+      <p class="cover-sub">Перевязки · Остановка кровотечения · Базовые навыки</p>
+      <div class="cover-line"></div>
+      <p class="cover-desc">
+        Простое и понятное руководство для каждого. Без медицинского образования.
+        Эти знания могут спасти жизнь — вашу или чужую.
+      </p>
+      <a href="#book" class="cover-btn">Читать →</a>
+
+      <div class="qr-block">
+        <div class="qr-box">
+          <div class="qr-placeholder">QR</div>
         </div>
-        <p class="auth-error hidden" id="authError"></p>
-        <button class="auth-submit" id="authSubmit" type="submit">Войти</button>
-      </form>
+        <p class="qr-label">Поделись с другом</p>
+      </div>
     </div>
   </div>
 
-  <!-- ПРИЛОЖЕНИЕ -->
-  <div id="appScreen" class="app hidden">
+  <!-- КНИГА -->
+  <main id="book" class="book">
 
-    <header class="app-header">
-      <div class="header-left">
-        <span class="header-logo">ОСГОворим</span>
-        <span class="conn-dot" id="connDot"></span>
-        <span class="header-status" id="wsStatus">подключение…</span>
+    <!-- ГЛАВА 1 -->
+    <section class="chapter">
+      <div class="chapter-num">Глава I</div>
+      <h2 class="chapter-title">Перевязка ран</h2>
+
+      <p class="lead">
+        Правильная перевязка — это не сложно. Главное — действовать спокойно,
+        чисто и последовательно. Первые несколько минут определяют всё.
+      </p>
+
+      <div class="photo-grid">
+        <figure class="photo-item photo-wide">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Applying_a_bandage.jpg/1280px-Applying_a_bandage.jpg" alt="Наложение повязки" loading="lazy">
+          <figcaption>Наложение давящей повязки на рану</figcaption>
+        </figure>
       </div>
-      <button class="logout-btn" id="logoutBtn" title="Выйти">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        <span>Выйти</span>
-      </button>
-    </header>
 
-    <main class="main">
-      <button class="pizdets-btn" id="pizdetsBtn">ПИЗДЕЦ</button>
+      <h3>Что делать при ране</h3>
+      <ol class="steps">
+        <li><strong>Защити руки</strong> — надень перчатки или используй пакет, ткань. Не касайся крови голыми руками.</li>
+        <li><strong>Останови кровь</strong> — прижми рану чистой тканью или бинтом и держи с давлением минимум 10 минут.</li>
+        <li><strong>Не убирай ткань</strong> — если она пропиталась, наложи ещё один слой сверху. Убирать нельзя — оторвёшь сгусток.</li>
+        <li><strong>Зафиксируй повязку</strong> — забинтуй или закрепи пластырем так, чтобы не сползала.</li>
+        <li><strong>Вызови помощь</strong> — при глубоких ранах, пульсирующем кровотечении или ране на голове/животе — скорую немедленно.</li>
+      </ol>
 
-      <div class="online-box">
-        <div class="online-title">
-          ОНЛАЙН
-          <span class="online-badge" id="onlineCount">0</span>
+      <div class="photo-grid two-col">
+        <figure class="photo-item">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Triangular_bandage_arm_sling.jpg/640px-Triangular_bandage_arm_sling.jpg" alt="Косынка" loading="lazy">
+          <figcaption>Косыночная повязка для руки</figcaption>
+        </figure>
+        <figure class="photo-item">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Tourniquet.jpg/640px-Tourniquet.jpg" alt="Жгут" loading="lazy">
+          <figcaption>Жгут при сильном кровотечении конечности</figcaption>
+        </figure>
+      </div>
+
+      <div class="tip-box">
+        <div class="tip-icon">💡</div>
+        <p><strong>Запомни:</strong> давление важнее чистоты. Лучше грязная тряпка прямо сейчас, чем стерильный бинт через пять минут.</p>
+      </div>
+    </section>
+
+    <!-- ГЛАВА 2 -->
+    <section class="chapter">
+      <div class="chapter-num">Глава II</div>
+      <h2 class="chapter-title">Остановка кровотечения</h2>
+
+      <p class="lead">
+        Сильное кровотечение убивает быстрее, чем любая другая травма.
+        У тебя есть 3–5 минут. Действуй.
+      </p>
+
+      <h3>Виды кровотечений</h3>
+      <div class="cards">
+        <div class="card card-yellow">
+          <div class="card-title">Венозное</div>
+          <p>Кровь тёмная, течёт ровно. Давящая повязка обычно останавливает.</p>
         </div>
-        <ul class="user-list" id="userList"></ul>
+        <div class="card card-red">
+          <div class="card-title">Артериальное</div>
+          <p>Кровь ярко-красная, бьёт пульсирующей струёй. Нужен жгут или пальцевое прижатие артерии.</p>
+        </div>
+        <div class="card card-green">
+          <div class="card-title">Капиллярное</div>
+          <p>Кровь сочится по всей поверхности. Промой, обработай, заклей пластырем.</p>
+        </div>
       </div>
 
-      <button class="install-btn hidden" id="installBtn">📲 Установить приложение</button>
+      <h3>Жгут — когда и как</h3>
+      <ol class="steps">
+        <li>Накладывай только на конечности (руку или ногу) при артериальном кровотечении.</li>
+        <li>Место — на 5–7 см выше раны, поверх одежды или на мягкую подкладку.</li>
+        <li>Затяни до остановки кровотечения — не сильнее.</li>
+        <li><strong>Запиши время</strong> наложения — на бумаге, на коже, на лбу пострадавшего. Это критично.</li>
+        <li>Максимум: 1 час зимой, 2 часа летом. Потом ослабь на 10–15 минут.</li>
+      </ol>
 
-    </main>
+      <div class="warn-box">
+        <div class="warn-icon">⚠️</div>
+        <p><strong>Нельзя:</strong> накладывать жгут на шею, грудь, живот. Нельзя накрывать жгут одеждой — он должен быть виден.</p>
+      </div>
+    </section>
 
-  </div>
+    <!-- ГЛАВА 3 -->
+    <section class="chapter">
+      <div class="chapter-num">Глава III</div>
+      <h2 class="chapter-title">Аптечка — что иметь дома</h2>
 
-  <div class="toast" id="toast"></div>
+      <p class="lead">
+        Минимальный набор, который стоит иметь в каждом доме. Проверяй срок годности раз в год.
+      </p>
 
-  <script type="module" src="app.js"></script>
+      <div class="kit-list">
+        <div class="kit-item">
+          <span class="kit-icon">🩹</span>
+          <div>
+            <strong>Бинты</strong> — стерильные, разного размера (5 см и 10 см)
+          </div>
+        </div>
+        <div class="kit-item">
+          <span class="kit-icon">🧤</span>
+          <div>
+            <strong>Перчатки латексные</strong> — минимум 2 пары
+          </div>
+        </div>
+        <div class="kit-item">
+          <span class="kit-icon">✂️</span>
+          <div>
+            <strong>Ножницы</strong> — тупоконечные, для разрезания одежды и бинтов
+          </div>
+        </div>
+        <div class="kit-item">
+          <span class="kit-icon">🔴</span>
+          <div>
+            <strong>Жгут кровоостанавливающий</strong> — резиновый или турникет типа CAT
+          </div>
+        </div>
+        <div class="kit-item">
+          <span class="kit-icon">🧴</span>
+          <div>
+            <strong>Хлоргексидин</strong> — для обработки ран (не йод, не зелёнка)
+          </div>
+        </div>
+        <div class="kit-item">
+          <span class="kit-icon">💊</span>
+          <div>
+            <strong>Обезболивающее</strong> — ибупрофен или парацетамол
+          </div>
+        </div>
+        <div class="kit-item">
+          <span class="kit-icon">📋</span>
+          <div>
+            <strong>Эта инструкция</strong> — распечатай и положи в аптечку
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ЭКСТРЕННЫЕ НОМЕРА -->
+    <section class="chapter emergency">
+      <h2 class="chapter-title">Экстренные номера</h2>
+      <div class="phones">
+        <div class="phone-item">
+          <div class="phone-num">112</div>
+          <div class="phone-label">Единый экстренный</div>
+        </div>
+        <div class="phone-item">
+          <div class="phone-num">103</div>
+          <div class="phone-label">Скорая помощь</div>
+        </div>
+        <div class="phone-item">
+          <div class="phone-num">101</div>
+          <div class="phone-label">Пожарная</div>
+        </div>
+      </div>
+      <p class="emergency-note">При вызове скорой: назови адрес, что случилось, сколько пострадавших, своё имя. Не клади трубку первым.</p>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>Первая помощь · Базовое руководство</p>
+    <p class="footer-note">Эта инструкция не заменяет медицинское образование. При серьёзных травмах всегда вызывай скорую.</p>
+  </footer>
+
 </body>
 </html>
